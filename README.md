@@ -1,9 +1,9 @@
 # GBC-dot-matrix-shader
-this is an interpretation of the gameboy-color-dot-matrix-white-bg slang shader from @mattakins for OpenGL graphics driver on RetroArch.
+This is an interpretation of the gameboy-color-dot-matrix-white-bg slang shader from @mattakins for OpenGL graphics driver on RetroArch.
 
-This works in any openGl machine!!!
+This works in any openGl handheld now!!!
 
-I tried on TrimUI Smart Pro with no issues.
+I tried it on my TrimUI Smart Pro with no issues.
 
 ## Instruccions 
 
