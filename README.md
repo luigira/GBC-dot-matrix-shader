@@ -1,7 +1,8 @@
 # Game Boy Dot Matrix Shaders
 
+![image](https://github.com/user-attachments/assets/e99769e9-1646-4a5c-9a6b-913f295a3823)
 
-![Image](https://github.com/user-attachments/assets/8582c4ea-8988-4fe6-9109-b62824e7e9d6)
+![image](https://github.com/user-attachments/assets/24bd549b-6bff-4076-abef-0e0b00a759e2)
 
 This project is a reinterpretation of previous Game Boy and Game Boy Color shaders available for Vulkan API. This version targets diferent OpenGL versions, expecialy more modest GPU available on retro handhealds, for use with RetroArch OpenGL API.
 
