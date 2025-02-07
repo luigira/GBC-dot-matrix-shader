@@ -4,6 +4,9 @@
 
 ![image](https://github.com/user-attachments/assets/24bd549b-6bff-4076-abef-0e0b00a759e2)
 
+![image](https://github.com/user-attachments/assets/66fe350a-8217-457e-ac5f-3c61fb224805)
+
+
 This project is a reinterpretation of previous Game Boy and Game Boy Color shaders available for Vulkan API. This version targets diferent OpenGL versions, expecialy more modest GPU available on retro handhealds, for use with RetroArch OpenGL API.
 
 The shaders aim to simulate a **dotted** image, mimicking the visual style of various Game Boy models, including the DMG Game Boy and a Game Boy Color. While a Dot Matrix Game Boy Color never existed, these shaders offer artistic interpretations of what such devices might have looked like, rather than direct emulations. Same can apply for the Game Boy Advance shader available in this collection. 
