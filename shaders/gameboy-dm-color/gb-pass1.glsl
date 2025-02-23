@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////
 //                                                                       //
-// Gameboy Color Dot Matrix v0.5                                         //
+// Gameboy Color Dot Matrix v0.9                                        //
 //                                                                       //
 // Copyright (C) 2024 LuigiRa : ra.luigi@gmail.com                       //
 //                                                                       //
@@ -28,7 +28,7 @@
 #pragma parameter blending_mode "Blending Mode" 0.0 0.0 1.0 1.0            
 
 // The amount of alpha swapped between neighboring texels
-#pragma parameter adjacent_texel_alpha_blending "Neighbor Blending" 0.15 0.0 1.0 0.15
+#pragma parameter adjacent_texel_alpha_blending "Neighbor Blending" 0.10 0.0 1.0 0.05
 
 #if defined(VERTEX)
 ////////////////////////////////////////////////////////////////////////////////

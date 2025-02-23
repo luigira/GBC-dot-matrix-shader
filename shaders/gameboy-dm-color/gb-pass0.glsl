@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////
 //                                                                       //
-// Gameboy Color Dot Matrix v0.6                                         //
+// Gameboy Color Dot Matrix v0.9                                         //
 //                                                                       //
-// Copyright (C) 2024 LuigiRa : ra.luigi@gmail.com                       //
+// Copyright (C) 2025 LuigiRa : ra.luigi@gmail.com                       //
 //                                                                       //
 // This program is free software: you can redistribute it and/or modify  //
 // it under the terms of the GNU General Public License as published by  //
-// the Free Software Foundation, either version 3 of the License, or     //
+// the Free Software Foundation, either version 3 of the License, o`r     //
 // (at your option) any later version.                                   //
 //                                                                       //
 // This program is distributed in the hope that it will be useful,       //
@@ -19,24 +19,15 @@
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-// Config                                                                     //
-////////////////////////////////////////////////////////////////////////////////
-
-// The alpha value of dots in their "off" state
-// Does not affect the border region of the screen - [0, 1]
 #pragma parameter baseline_alpha "Baseline Alpha" 1.0 0.0 1.0 0.01
-
-// Toggle color effect
+#pragma parameter console_border_enable "Console-Border Enable" 0.0 0.0 1.0 1.0
+#pragma parameter video_scale "Video Scale" 3.0 2.0 9.0 1.0
+#pragma parameter response_time "LCD Response Time" 0.0 0.0 0.777 0.111
 #pragma parameter color_toggle "Color Toggle" 0.0 0.0 1.0 1.0
-
-// Toggle negative effect
 #pragma parameter negative_toggle "Negative Toggle" 0.0 0.0 1.0 1.0
+#pragma parameter desaturate_toggle "Desaturate Toggle" 0.4 0.0 1.0 0.1
 
 #if defined(VERTEX)
-////////////////////////////////////////////////////////////////////////////////
-// Vertex shader                                                              //
-////////////////////////////////////////////////////////////////////////////////
 
 #if __VERSION__ >= 130
 #define COMPAT_VARYING out
@@ -72,15 +63,14 @@ uniform COMPAT_PRECISION vec2 InputSize;
 
 #ifdef PARAMETER_UNIFORM
 uniform COMPAT_PRECISION float baseline_alpha;
-uniform COMPAT_PRECISION float console_border_enable;
+uniform COMPAT_PRECISION float grey_balance;
+uniform COMPAT_PRECISION float response_time;
 uniform COMPAT_PRECISION float video_scale;
-uniform COMPAT_PRECISION float color_toggle;
-uniform COMPAT_PRECISION float negative_toggle;
+uniform COMPAT_PRECISION float console_border_enable;
 #else
-#define baseline_alpha 0.85
-#define console_border_enable 0.0
-#define color_toggle 0.0
-#define negative_toggle 0.0
+#define baseline_alpha 0.10
+#define response_time 0.333
+#define video_scale 3.0
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,25 +80,30 @@ uniform COMPAT_PRECISION float negative_toggle;
 #define vTexCoord TEX0.xy
 #define SourceSize vec4(TextureSize, 1.0 / TextureSize) //either TextureSize or InputSize
 #define outsize vec4(OutputSize, 1.0 / OutputSize)
-
-
-//it's... half a pixel
-#define half_pixel          (vec2(0.5) * outsize.zw)   
+#define half_pixel (vec2(0.5) * outsize.zw) 
+//#define video_scale floor(outsize.y * SourceSize.w)
 
 void main()
 {
-    float video_scale = max(OutputSize.x / TextureSize.x, OutputSize.y / TextureSize.y);
-    gl_Position = MVPMatrix * VertexCoord;
+    float scale_x = floor(outsize.x / InputSize.x);
+    float scale_y = floor(outsize.y / InputSize.y);
+    float video_scale_factor = min(scale_x, scale_y);
+    if (console_border_enable > 0.5) {
+        video_scale_factor = video_scale;
+    }
+    vec2 scaled_video_out = InputSize.xy * vec2(video_scale_factor);
+    gl_Position = MVPMatrix * VertexCoord / vec4(outsize.xy / scaled_video_out, 1.0, 1.0);
     COL0 = COLOR;
     TEX0.xy = TexCoord.xy + half_pixel;
     dot_size = SourceSize.zw;
-    one_texel = 1.0 / (SourceSize.xy * video_scale);
+    one_texel = 1.0 / (SourceSize.xy * video_scale_factor);
 }
 
 #elif defined(FRAGMENT)
 ////////////////////////////////////////////////////////////////////////////////
 // Fragment shader                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+
 
 #if __VERSION__ >= 130
 #define COMPAT_VARYING in
@@ -152,65 +147,72 @@ COMPAT_VARYING vec2 one_texel;
 // compatibility #defines
 #define Source Texture
 #define vTexCoord TEX0.xy
-
 #define SourceSize vec4(TextureSize, 1.0 / TextureSize) //either TextureSize or InputSize
 #define outsize vec4(OutputSize, 1.0 / OutputSize)
 
 #ifdef PARAMETER_UNIFORM
 uniform COMPAT_PRECISION float baseline_alpha;
-uniform COMPAT_PRECISION float console_border_enable;
-uniform COMPAT_PRECISION float video_scale;
+uniform COMPAT_PRECISION float grey_balance;
+uniform COMPAT_PRECISION float response_time;
 uniform COMPAT_PRECISION float color_toggle;
 uniform COMPAT_PRECISION float negative_toggle;
+uniform COMPAT_PRECISION float desaturate_toggle;
 #endif
 
+ 
 ////////////////////////////////////////////////////////////////////////////////
 //fragment definitions                                                        //
 ////////////////////////////////////////////////////////////////////////////////
-
-#define foreground_color COMPAT_TEXTURE(COLOR_PALETTE, vec2(0.75, 0.5)).rgb                 //hardcoded to look up the foreground color from the right half of the palette image
-//#define rgb_to_alpha(rgb) ( ((rgb.r + rgb.g + rgb.b) / 3.0) + (is_on_dot * vec2(baseline_alpha), 1.0) )       //averages rgb values (allows it to work with color games), modified for contrast and base alpha
-
-// Frame sampling definitions
-vec3 curr_rgb_original = COMPAT_TEXTURE(Source, vTexCoord).rgb;
-vec3 curr_rgb_negative = abs(1.0 - curr_rgb_original);
-vec3 curr_rgb = mix(curr_rgb_original, curr_rgb_negative, step(0.5, negative_toggle));
-
-#define prev0_rgb COMPAT_TEXTURE(PrevTexture, vTexCoord).rgb
-#define prev1_rgb COMPAT_TEXTURE(Prev1Texture, vTexCoord).rgb
-#define prev2_rgb COMPAT_TEXTURE(Prev2Texture, vTexCoord).rgb
-#define prev3_rgb COMPAT_TEXTURE(Prev3Texture, vTexCoord).rgb
-#define prev4_rgb COMPAT_TEXTURE(Prev4Texture, vTexCoord).rgb
-#define prev5_rgb COMPAT_TEXTURE(Prev5Texture, vTexCoord).rgb
-#define prev6_rgb COMPAT_TEXTURE(Prev6Texture, vTexCoord).rgb
+ 
 
 void main()
 {
-    // Determine if the corrent texel lies on a dot or in the space between dots
-    float is_on_dot = 0.0;                   
-    if ( mod(vTexCoord.x, dot_size.x) > one_texel.x && mod(vTexCoord.y, dot_size.y * 1.0001) > one_texel.y )
+    vec3 foreground_color = COMPAT_TEXTURE(COLOR_PALETTE, vec2(0.75, 0.5)).rgb;
+    vec3 curr_rgb_original = COMPAT_TEXTURE(Texture, TEX0.xy).rgb;
+    vec3 curr_rgb_negative = vec3(1.0) - curr_rgb_original;
+    vec3 curr_rgb = mix(curr_rgb_original, curr_rgb_negative, step(0.5, negative_toggle));
+
+    float is_on_dot = 0.0;
+    if (mod(TEX0.x, dot_size.x) > one_texel.x && mod(TEX0.y, dot_size.y * 1.0001) > one_texel.y)
         is_on_dot = 1.0;
 
     vec3 input_rgb = curr_rgb;
-  
 
-    float rgb_to_alpha = (input_rgb.r + input_rgb.g + input_rgb.b)
-                        + (is_on_dot * baseline_alpha);
+    // Apply response time smoothing with a decreasing impact of each previous frame
+    float base_factor = pow(response_time, 2.0); // Adjust the exponent for a smoother curve
 
-    // Apply foreground color and assign alpha value
-    // Apply the foreground color to all texels -
-    // the color will be modified by alpha later - and assign alpha based on rgb input
+    input_rgb += (COMPAT_TEXTURE(PrevTexture, TEX0.xy).rgb - input_rgb) * response_time;
+    input_rgb += (COMPAT_TEXTURE(Prev1Texture, TEX0.xy).rgb - input_rgb) * base_factor * 0.5;
+    input_rgb += (COMPAT_TEXTURE(Prev2Texture, TEX0.xy).rgb - input_rgb) * base_factor * 0.25;
+    input_rgb += (COMPAT_TEXTURE(Prev3Texture, TEX0.xy).rgb - input_rgb) * base_factor * 0.125;
+    input_rgb += (COMPAT_TEXTURE(Prev4Texture, TEX0.xy).rgb - input_rgb) * base_factor * 0.0625;
+    input_rgb += (COMPAT_TEXTURE(Prev5Texture, TEX0.xy).rgb - input_rgb) * base_factor * 0.03125;
+    input_rgb += (COMPAT_TEXTURE(Prev6Texture, TEX0.xy).rgb - input_rgb) * base_factor * 0.015625;
+
+    // Calculate the alpha based on the weighted input RGB
+    float rgb_to_alpha = (input_rgb.r + input_rgb.g + input_rgb.b) / 3.0 + (is_on_dot * baseline_alpha);
+
+    // Apply color toggle and mix the input color with the foreground color
     vec3 final_color = mix(input_rgb, foreground_color, color_toggle);
-    vec4 out_color = vec4(final_color, rgb_to_alpha);  
 
-    // Overlay the matrix
-    // If the fragment is not on a dot, set its alpha value to 0
-    if (dot(input_rgb, vec3(0.299, 0.587, 0.114)) > 0.95) {
-        out_color.a = 1.0;
+    // Luminance calculation for desaturation
+    float luminance = dot(final_color, vec3(0.299, 0.587, 0.114));
+    final_color = mix(final_color, vec3(luminance), desaturate_toggle);
+
+    vec4 out_color = vec4(final_color, rgb_to_alpha);
+
+// Determine if all elements should be considered as "on dot" based on color_toggle
+if (color_toggle > 0.5) {
+    out_color.a *= is_on_dot; // Treat all pixels as "on dot"
+} else {
+    // Adjust alpha transparency based on luminance threshold
+    if (dot(input_rgb, vec3(0.299, 0.587, 0.114)) > 0.85) {
+        out_color.a = 1.0; // Fully opaque if luminance is high enough
     } else {
-        out_color.a *= is_on_dot;
+        out_color.a *= is_on_dot; // Only apply dot masking if necessary
     }
+}
 
-    FragColor = out_color;
+    gl_FragColor = out_color;
 }
 #endif
