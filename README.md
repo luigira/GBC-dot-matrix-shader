@@ -2,20 +2,20 @@
 
 ![image](https://github.com/user-attachments/assets/e99769e9-1646-4a5c-9a6b-913f295a3823)
 
-![image](https://github.com/user-attachments/assets/24bd549b-6bff-4076-abef-0e0b00a759e2)
+This project is a reinterpretation/translation/new aproach of several previous Game Boy, Game Boy Color, and Game Boy Advance shader available for more modern Vulkan API present in more powerfull hardware like Android and Desktop computers. This version targets diferent OpenGL devices, expecialy more modest one with GPUs capable of old openGL APIs and ES editions, mostly available on retro handhealds (small linux PCs), for use within RetroArch (mostly) and the OpenGL video driver.
 
-![image](https://github.com/user-attachments/assets/66fe350a-8217-457e-ac5f-3c61fb224805)
-
-
-This project is a reinterpretation of previous Game Boy and Game Boy Color shaders available for Vulkan API. This version targets diferent OpenGL versions, expecialy more modest GPU available on retro handhealds, for use with RetroArch OpenGL API.
-
-The shaders aim to simulate a **dotted** image, mimicking the visual style of various Game Boy models, including the DMG Game Boy and a Game Boy Color. While a Dot Matrix Game Boy Color never existed, these shaders offer artistic interpretations of what such devices might have looked like, rather than direct emulations. Same can apply for the Game Boy Advance shader available in this collection. 
+The shaders aim to simulate a **dotted image**, mimicking the visual style of origignal DMG Game Boy model. While a Dot Matrix Game Boy Color never existed, these shaders offer an artistic interpretations of what such devices might have looked like, rather than direct emulations. Same can apply for the Game Boy Advance shader available in this collection. 
 
 ## Features
+![image](https://github.com/user-attachments/assets/66fe350a-8217-457e-ac5f-3c61fb224805)
 
 This collection includes seven shaders, each tailored for different Game Boy models. One of the key improvements is more efficient processing for modest hardware. The original Vulkan shader used five passes, making it very demanding on GPU resources. This updated version achieves nearly the same visual effect with only three passes, offering improved performance on a wider range of chipsets like H700, Rk3566, and other Linux based retro handheld systems.
 
 Version 1.0.1 is compatible across several OpenGL implementations, including OpenGL Desktop (version 130), used in many entry-level handheld GPUs, as well as OpenGL ES 2.0 and 3.0 for more modern mobile devices. For high-end Android devices, the original GBC DMG shader is available with native Vulkan support. If you encounter any problems with a particular device, let me know .
+
+![image](https://github.com/user-attachments/assets/24bd549b-6bff-4076-abef-0e0b00a759e2)
+
+The original DMG, Pocket, and Light Game Boys aim to replicate the screen appearance of their respective devices. In contrast, the GBC and GBA dot-matrix simulations are both artistic interpretations and aspirations. My most played games are RPGs with substantial text (aka Final Fantas* and monster-catching games like Pok*mon). Therefore, I desire a shader that doesn't apply dots to the white spaces, akin to the DMG approach. I can't recall if the DMG truly had this feature, but I aim to emulate a dot-matrix screen where only black dots appear where information is displayed; in the case of the GBC and GBA, in color. This way, white spaces remain white, while colored areas exhibit a simulated dot-matrix effect.
 
 # **Instructions for standalone release**  
 
