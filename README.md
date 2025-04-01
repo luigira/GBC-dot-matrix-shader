@@ -2,7 +2,7 @@
 
 ![image](https://github.com/user-attachments/assets/e99769e9-1646-4a5c-9a6b-913f295a3823)
 
-This project is a reinterpretation/translation/new aproach of several previous Game Boy, Game Boy Color, and Game Boy Advance shader available for more modern Vulkan API present in more powerfull hardware like Android and Desktop computers. This version targets diferent OpenGL devices, expecialy more modest one with GPUs capable of old openGL APIs and ES editions, mostly available on retro handhealds (small linux PCs), for use within RetroArch (mostly) and the OpenGL video driver.
+This project is a reinterpretation/translation/new aproach of several previous Game Boy, Game Boy Color, and Game Boy Advance shaders available for more modern Vulkan APIs, designed for more powerful hardware like Android devices and desktop computers. This version targets different OpenGL devices, especially more modest ones with GPUs capable of older OpenGL APIs and ES editions, mostly found in retro handhelds (small Linux-based PCs), for use primarily within RetroArch and the OpenGL video driver.
 
 The shaders aim to simulate a **dotted image**, mimicking the visual style of origignal DMG Game Boy model. While a Dot Matrix Game Boy Color never existed, these shaders offer an artistic interpretations of what such devices might have looked like, rather than direct emulations. Same can apply for the Game Boy Advance shader available in this collection. 
 
